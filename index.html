@@ -1,136 +1,67 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-900 text-white">
+<html lang="en" class="bg-gray-900 text-white">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CyberEmulator</title>
-  <!-- Tailwind Play CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- EmulatorJS Configuration -->
-  <script>
-    window.EJS_player = "#gameDiv";
-    window.EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
-  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retro Emulator</title>
+  <script src="https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@latest/loader.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    canvas {
+      border: 2px solid white;
+      margin-top: 1rem;
+    }
+    select, button {
+      color: black;
+    }
+    .controls button {
+      margin: 0 0.25rem;
+    }
+  </style>
 </head>
-<body class="h-full flex flex-col">
+<body class="flex flex-col items-center justify-center min-h-screen px-4 py-8">
 
-  <!-- Header -->
-  <header class="bg-gray-800 p-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold">CyberEmulator</h1>
-    <button id="fullscreenBtn" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Fullscreen</button>
-  </header>
+  <h1 class="text-4xl font-bold mb-4">🎮 Retro Emulator</h1>
+  <p class="mb-6 text-sm text-gray-300">Play preset games right in your browser.</p>
 
-  <!-- Main Layout -->
-  <main class="flex-1 flex md:flex-row flex-col overflow-hidden">
-    <!-- Sidebar -->
-    <aside class="bg-gray-800 p-4 w-full md:w-64 overflow-y-auto">
-      <h2 class="text-xl font-semibold mb-4">Game Library</h2>
-      <ul id="gameList" class="space-y-2"></ul>
+  <select id="romSelector" class="px-4 py-2 rounded mb-4 text-black">
+    <option value="">-- Select a Game --</option>
+    <option value="nes:https://cdn.emulatorjs.org/roms/nes/Donkey%20Kong%20(Japan).zip">Donkey Kong (NES)</option>
+    <option value="gba:https://cdn.emulatorjs.org/roms/gba/Dr%20Mario%20%26%20Puzzle%20League.zip">Dr. Mario & Puzzle League (GBA)</option>
+    <option value="gb:https://cdn.emulatorjs.org/roms/gb/Tetris%20(UE).zip">Tetris (GB)</option>
+    <option value="snes:https://cdn.emulatorjs.org/roms/snes/Donkey%20Kong%20Country.zip">Donkey Kong Country (SNES)</option>
+    <option value="n64:roms/super-mario-64.z64">Super Mario 64 (N64) – (Upload your own)</option>
+  </select>
 
-      <hr class="my-4 border-gray-700"/>
+  <div class="controls mb-4">
+    <button onclick="loadSelectedRom()" class="bg-white px-4 py-2 rounded font-bold text-black">▶️ Play</button>
+    <button onclick="EJS_fullscreen()" class="bg-white px-4 py-2 rounded font-bold text-black">🖥️ Fullscreen</button>
+    <button onclick="EJS_saveState()" class="bg-white px-4 py-2 rounded font-bold text-black">💾 Save</button>
+    <button onclick="EJS_loadState()" class="bg-white px-4 py-2 rounded font-bold text-black">📂 Load</button>
+  </div>
 
-      <h3 class="font-semibold mb-2">Upload ROM</h3>
-      <input id="romInput" type="file" accept=".nes,.sfc,.gb,.gba,.z64,.bin" class="w-full text-black p-2 rounded" />
-    </aside>
+  <div id="emulator" class="w-full max-w-4xl"></div>
 
-    <!-- Game Area -->
-    <section class="flex-1 bg-black flex flex-col">
-      <div id="gameDiv" class="flex-grow bg-black"></div>
-      <div class="bg-gray-800 p-4 flex flex-wrap gap-4">
-        <button id="saveBtn" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700">💾 Save</button>
-        <button id="loadBtn" class="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700">📂 Load</button>
-        <select id="slots" class="bg-gray-700 px-2 py-1 rounded text-white"></select>
-      </div>
-    </section>
-  </main>
-
-  <!-- Game & Emulator Logic -->
   <script>
-    const games = [
-      { name: "Super Mario Bros.", core:"nes", rom:"https://cdn.jsdelivr.net/gh/emulatorjs/roms@master/nes/smb.nes" },
-      { name: "Tetris (NES)", core:"nes", rom:"https://cdn.jsdelivr.net/gh/emulatorjs/roms@master/nes/tetris.nes" },
-      { name: "Pokémon Red (GB)", core:"gb", rom:"https://cdn.jsdelivr.net/gh/emulatorjs/roms@master/gb/pokemon-red.gb" },
-      { name: "Donkey Kong Country (SNES)", core:"snes", rom:"https://cdn.jsdelivr.net/gh/emulatorjs/roms@master/snes/dkc.sfc" },
-      { name: "Super Mario 64 (N64)", core:"n64", rom:"https://cdn.jsdelivr.net/gh/emulatorjs/roms@master/n64/sm64.z64" }
-    ];
+    function loadSelectedRom() {
+      const value = document.getElementById('romSelector').value;
+      if (!value) return alert("Please select a game.");
+      const [core, path] = value.split(':');
 
-    let loaded = false;
-    let currentName = "";
+      EJS_player = '#emulator';
+      EJS_core = core;
+      EJS_gameUrl = path;
+      EJS_fullscreenOnLoad = false;
+      EJS_mouse = false;
+      EJS_lightgun = false;
+      EJS_multitap = false;
+      EJS_gamepadSupport = true;
+      EJS_loadStateOnStart = false;
 
-    function initGame(game) {
-      window.EJS_core = game.core;
-      window.EJS_gameUrl = game.rom;
-      window.EJS_gameName = game.name;
-      currentName = game.name;
-
-      document.getElementById("gameDiv").innerHTML = "";
-      const s = document.createElement("script");
-      s.onerror = () => alert("Error loading emulator core (check console or COEP/COOP headers).");
-      s.src = "https://cdn.emulatorjs.org/stable/data/loader.js";
-      document.body.appendChild(s);
-      s.onload = () => {
-        loaded = true;
-        refreshSlots();
-      };
+      EJS_start();
     }
-
-    document.getElementById("gameList").append(
-      ...games.map(g => {
-        const li = document.createElement("li");
-        li.textContent = g.name + ` (${g.core.toUpperCase()})`;
-        li.className = "cursor-pointer p-2 hover:bg-gray-700 rounded";
-        li.onclick = () => initGame(g);
-        return li;
-      })
-    );
-
-    document.getElementById("romInput").addEventListener("change", evt => {
-      const file = evt.target.files[0];
-      if (!file) return;
-      const url = URL.createObjectURL(file);
-      const ext = file.name.split('.').pop();
-      const core = {
-        nes: "nes",
-        sfc: "snes",
-        gb: "gb",
-        gba: "gba",
-        z64: "n64",
-        bin: "genesis"
-      }[ext] || "nes";
-      initGame({ name: file.name, core, rom: url });
-    });
-
-    document.getElementById("fullscreenBtn").onclick = () => {
-      const div = document.getElementById("gameDiv");
-      if (div.requestFullscreen) div.requestFullscreen();
-      else if (div.webkitRequestFullscreen) div.webkitRequestFullscreen();
-    };
-
-    function refreshSlots() {
-      const sel = document.getElementById("slots");
-      sel.innerHTML = "";
-      const key = `save_${currentName}_0`;
-      if (localStorage.getItem(key)) {
-        sel.append(new Option("Slot 1", key));
-      }
-    }
-
-    document.getElementById("saveBtn").onclick = () => {
-      if (!loaded || !window.EJS_onSaveState) return;
-      window.EJS_onSaveState({ name: currentName, slot: 0 });
-      localStorage.setItem(`save_${currentName}_0`, window.EJS_saveState || "");
-      refreshSlots();
-    };
-
-    document.getElementById("loadBtn").onclick = () => {
-      const key = document.getElementById("slots").value;
-      const state = localStorage.getItem(key);
-      if (state && window.EJS_onLoadState) window.EJS_onLoadState(state);
-    };
-
-    // Load first game automatically
-    initGame(games[0]);
   </script>
 </body>
 </html>
