@@ -1,48 +1,40 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-gray-900 text-white">
+<html lang="en" class="h-full bg-gray-950 text-white">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Retro Emulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CyberEmulator</title>
   <script src="https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@latest/loader.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-    }
-    canvas {
-      border: 2px solid white;
-      margin-top: 1rem;
-    }
-    select, button {
-      color: black;
-    }
-    .controls button {
-      margin: 0 0.25rem;
-    }
-  </style>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+<body class="flex flex-col items-center justify-start min-h-screen p-6 space-y-4">
 
-  <h1 class="text-4xl font-bold mb-4">🎮 Retro Emulator</h1>
-  <p class="mb-6 text-sm text-gray-300">Play preset games right in your browser.</p>
+  <h1 class="text-4xl font-extrabold text-cyan-400 drop-shadow-md">🎮 CyberEmulator</h1>
+  <p class="text-gray-400">Play retro games directly in your browser — N64, NES, SNES, GBA & more!</p>
 
-  <select id="romSelector" class="px-4 py-2 rounded mb-4 text-black">
-    <option value="">-- Select a Game --</option>
-    <option value="nes:https://cdn.emulatorjs.org/roms/nes/Donkey%20Kong%20(Japan).zip">Donkey Kong (NES)</option>
-    <option value="gba:https://cdn.emulatorjs.org/roms/gba/Dr%20Mario%20%26%20Puzzle%20League.zip">Dr. Mario & Puzzle League (GBA)</option>
-    <option value="gb:https://cdn.emulatorjs.org/roms/gb/Tetris%20(UE).zip">Tetris (GB)</option>
-    <option value="snes:https://cdn.emulatorjs.org/roms/snes/Donkey%20Kong%20Country.zip">Donkey Kong Country (SNES)</option>
-    <option value="n64:roms/super-mario-64.z64">Super Mario 64 (N64) – (Upload your own)</option>
-  </select>
+  <div class="flex flex-col sm:flex-row items-center gap-4">
+    <select id="romSelector" class="text-black px-4 py-2 rounded shadow-md">
+      <option value="">🎮 Select a Game</option>
+      <option value="nes:https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/nes/donkeykong.nes">Donkey Kong (NES)</option>
+      <option value="gb:https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/gb/tetris.gb">Tetris (GB)</option>
+      <option value="gba:https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/gba/DrMario.gba">Dr. Mario (GBA)</option>
+      <option value="snes:https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/snes/dkc.smc">Donkey Kong Country (SNES)</option>
+      <option value="n64:roms/super-mario-64.z64">Super Mario 64 (N64) — Upload yourself</option>
+    </select>
 
-  <div class="controls mb-4">
-    <button onclick="loadSelectedRom()" class="bg-white px-4 py-2 rounded font-bold text-black">▶️ Play</button>
-    <button onclick="EJS_fullscreen()" class="bg-white px-4 py-2 rounded font-bold text-black">🖥️ Fullscreen</button>
-    <button onclick="EJS_saveState()" class="bg-white px-4 py-2 rounded font-bold text-black">💾 Save</button>
-    <button onclick="EJS_loadState()" class="bg-white px-4 py-2 rounded font-bold text-black">📂 Load</button>
+    <button onclick="loadSelectedRom()" class="bg-cyan-500 hover:bg-cyan-600 px-5 py-2 rounded font-bold shadow-md">
+      ▶️ Launch
+    </button>
   </div>
 
-  <div id="emulator" class="w-full max-w-4xl"></div>
+  <div class="flex gap-2 flex-wrap justify-center">
+    <button onclick="EJS_fullscreen()" class="bg-gray-800 hover:bg-gray-700 px-4 py-1 rounded">🖥️ Fullscreen</button>
+    <button onclick="EJS_saveState()" class="bg-gray-800 hover:bg-gray-700 px-4 py-1 rounded">💾 Save</button>
+    <button onclick="EJS_loadState()" class="bg-gray-800 hover:bg-gray-700 px-4 py-1 rounded">📂 Load</button>
+    <button onclick="location.reload()" class="bg-red-600 hover:bg-red-700 px-4 py-1 rounded">🔄 Reset</button>
+  </div>
+
+  <div id="emulator" class="w-full max-w-5xl mt-4 border-4 border-cyan-500 rounded-xl overflow-hidden shadow-lg"></div>
 
   <script>
     function loadSelectedRom() {
@@ -50,18 +42,18 @@
       if (!value) return alert("Please select a game.");
       const [core, path] = value.split(':');
 
-      EJS_player = '#emulator';
+      EJS_player = "#emulator";
       EJS_core = core;
       EJS_gameUrl = path;
       EJS_fullscreenOnLoad = false;
-      EJS_mouse = false;
-      EJS_lightgun = false;
-      EJS_multitap = false;
       EJS_gamepadSupport = true;
-      EJS_loadStateOnStart = false;
-
+      EJS_multitap = false;
+      EJS_lightgun = false;
+      EJS_mouse = false;
       EJS_start();
     }
   </script>
+
+  <p class="text-sm text-gray-500 mt-10">CyberEmulator uses EmulatorJS. Only public/homebrew ROMs are provided. Upload your own N64 ROMs to the <code>/roms</code> folder.</p>
 </body>
 </html>
