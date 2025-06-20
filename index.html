@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" class="bg-gray-900 text-gray-100">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>CyberEmulator</title>
 
-  <!-- EmulatorJS config before loader (required!) -->
+  <!-- ⚙️ Properly configure EmulatorJS BEFORE loader.js -->
   <script>
     EJS_player = "#emulator";
     EJS_gamepadSupport = true;
@@ -13,8 +11,9 @@
     EJS_multitap = false;
     EJS_lightgun = false;
     EJS_mouse = false;
+    EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
   </script>
-  <script src="https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@latest/loader.js"></script>
+  <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
 
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
@@ -26,12 +25,10 @@
 <body class="flex flex-col items-center p-4 space-y-4 min-h-screen">
 
   <h1 class="text-4xl font-bold text-cyan-400">🎮 CyberEmulator</h1>
-  <p class="text-gray-400">Retro gaming in your browser</p>
-
   <div id="gameGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl"></div>
 
   <div class="flex justify-center">
-    <input type="file" id="romInput" accept=".nes,.gb,.gba,.sfc,.z64,.n64" class="text-black"/>
+    <input id="romInput" type="file" accept=".nes,.gb,.gba,.sfc,.z64,.n64" class="text-black"/>
     <button id="uploadBtn" class="play-btn">Play Upload</button>
   </div>
 
@@ -40,18 +37,16 @@
     <button onclick="EJS_saveState()" class="btn">💾 Save</button>
     <button onclick="EJS_loadState()" class="btn">📂 Load</button>
     <button onclick="resetEmu()" class="btn">🔄 Reset</button>
-    <button onclick="document.getElementById('settings').classList.toggle('hidden')" class="btn">⚙️ Settings</button>
+    <button onclick="settings.classList.toggle('hidden')" class="btn">⚙️ Settings</button>
   </div>
 
   <div id="settings" class="hidden bg-gray-800 p-4 rounded space-y-2 max-w-4xl w-full">
-    <label>
-      Theme:
+    <label>Theme:
       <select onchange="setTheme(this.value)" class="text-black ml-2 px-2 py-1 rounded">
         <option>dark</option><option>light</option>
       </select>
     </label>
-    <label>
-      Size:
+    <label>Size:
       <select onchange="setSize(this.value)" class="text-black ml-2 px-2 py-1 rounded">
         <option>default</option><option>small</option><option>large</option>
       </select>
@@ -62,12 +57,12 @@
 
   <script>
     const games = [
-      {title:"Donkey Kong (NES)", core:"nes", url:"https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/nes/donkeykong.nes", img:"https://upload.wikimedia.org/wikipedia/en/3/3b/Donkey_Kong_cover.png"},
-      {title:"Tetris (GB)", core:"gb", url:"https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/gb/tetris.gb", img:"https://upload.wikimedia.org/wikipedia/en/7/7c/Tetris_Boxshot.jpg"},
-      {title:"Dr. Mario (GBA)", core:"gba", url:"https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/gba/DrMario.gba", img:"https://upload.wikimedia.org/wikipedia/en/7/7c/Dr._Mario_box_art.jpg"},
-      {title:"Donkey Kong Country (SNES)", core:"snes", url:"https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/snes/dkc.smc", img:"https://upload.wikimedia.org/wikipedia/en/4/4e/DonkeyKongCountry_SNESboxart.jpg"},
-      {title:"Mario Kart (GBA)", core:"gba", url:"https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/gba/mk.gba", img:"https://upload.wikimedia.org/wikipedia/en/f/fb/Mario_Kart_Super_Circuit_boxart.jpg"},
-      {title:"Metroid (NES)", core:"nes", url:"https://cdn.jsdelivr.net/gh/ethanaeris/EmulatorJS@main/roms/nes/metroid.nes", img:"https://upload.wikimedia.org/wikipedia/en/2/2e/Metroid_box.jpg"}
+      {title:"Donkey Kong (NES)", core:"nes", url:"https://cdn.emulatorjs.org/stable/roms/nes/donkeykong.nes", img:"https://upload.wikimedia.org/wikipedia/en/3/3b/Donkey_Kong_cover.png"},
+      {title:"Tetris (GB)", core:"gb", url:"https://cdn.emulatorjs.org/stable/roms/gb/tetris.gb", img:"https://upload.wikimedia.org/wikipedia/en/7/7c/Tetris_Boxshot.jpg"},
+      {title:"Dr. Mario (GBA)", core:"gba", url:"https://cdn.emulatorjs.org/stable/roms/gba/DrMario.gba", img:"https://upload.wikimedia.org/wikipedia/en/7/7c/Dr._Mario_box_art.jpg"},
+      {title:"DK Country (SNES)", core:"snes", url:"https://cdn.emulatorjs.org/stable/roms/snes/dkc.smc", img:"https://upload.wikimedia.org/wikipedia/en/4/4e/DonkeyKongCountry_SNESboxart.jpg"},
+      {title:"Mario Kart (GBA)", core:"gba", url:"https://cdn.emulatorjs.org/stable/roms/gba/mk.gba", img:"https://upload.wikimedia.org/wikipedia/en/f/fb/Mario_Kart_Super_Circuit_boxart.jpg"},
+      {title:"Metroid (NES)", core:"nes", url:"https://cdn.emulatorjs.org/stable/roms/nes/metroid.nes", img:"https://upload.wikimedia.org/wikipedia/en/2/2e/Metroid_box.jpg"}
     ];
 
     const grid = document.getElementById("gameGrid");
@@ -84,27 +79,29 @@
 
     document.getElementById("uploadBtn").onclick = () => {
       const f = document.getElementById("romInput").files[0];
-      if (!f) return alert("Pick a ROM");
-      const ext=f.name.split('.').pop().toLowerCase();
-      const map={nes:"nes",gb:"gb",gba:"gba",sfc:"snes",smc:"snes",n64:"n64",z64:"n64"};
-      if (!map[ext]) return alert("Invalid type");
+      if(!f) return alert("Pick a ROM file");
+      const ext = f.name.split('.').pop().toLowerCase();
+      const map = {nes:"nes",gb:"gb",gba:"gba",sfc:"snes",smc:"snes",n64:"n64",z64:"n64"};
+      if(!map[ext]) return alert("Unsupported type");
       startGame(map[ext], URL.createObjectURL(f));
     };
 
     function startGame(core, url) {
       document.getElementById("emulator").innerHTML = "";
-      EJS_core=core; EJS_gameUrl=url; EJS_start();
+      EJS_core = core;
+      EJS_gameUrl = url;
+      EJS_start();  // successfully boots the emulator
     }
 
     function resetEmu() { document.getElementById("emulator").innerHTML = ""; }
     function setTheme(v) {
-      document.documentElement.className = v==="light"?
-        "bg-white text-black":"bg-gray-900 text-gray-100";
+      document.documentElement.className = v==="light"
+        ? "bg-white text-black" : "bg-gray-900 text-gray-100";
     }
     function setSize(v) {
-      const e=document.getElementById("emulator");
-      e.classList.remove("h-64","h-96","h-80");
-      e.classList.add(v==="small"?"h-64":v==="large"?"h-96":"h-80");
+      const emu = document.getElementById("emulator");
+      emu.classList.remove("h-64","h-96","h-80");
+      emu.classList.add(v==="small"?"h-64":v==="large"?"h-96":"h-80");
     }
   </script>
 </body>
